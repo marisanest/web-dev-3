@@ -19,15 +19,16 @@ namespace Beleg3.Controllers
                     var loggedInUser = HttpContext.User.Identity.Name;
                     var user = db.Users.First(u => u.Email == loggedInUser);
                     var list = db.Todo.Where(b => b.Owner.Id == user.Id).ToList();
+                    List<TodoModel> todoList = new List<TodoModel>();
+                    foreach (var item in list){
+                        var todo = new TodoModel();
+                        todo = item;
+                        todoList.Add(todo);
 
-                    var todo = new TodoModel
-                    {
-                        Titel = "Web3 Beleg",
-                        Description = "schnell mal runter programmieren",
-                        Owner = user
-                    };
-                    db.Todo.Add(todo);
-                    db.SaveChanges();
+
+                    }
+                    return View(todoList);
+                 
                 }
             }
                 return View();
@@ -48,18 +49,32 @@ namespace Beleg3.Controllers
 
         // POST: Todo/Create
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        public ActionResult Create(TodoModel model)
         {
-
             try
             {
-                // TODO: Add insert logic here
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
 
+                using (var db = new Models.ApplicationDbContext())
+                {
+                    if (HttpContext.User.Identity.IsAuthenticated)
+                    {
+                        var loggedInUser = HttpContext.User.Identity.Name;
+                        var user = db.Users.First(u => u.Id == loggedInUser);
+                        model.Owner = user;
+                        db.Todo.Add(model);
+                        db.SaveChanges();
+                    }
+                }
                 return RedirectToAction("Index");
             }
             catch
             {
-                return View();
+                return RedirectToAction("Index");
+//                return View();
             }
         }
 
