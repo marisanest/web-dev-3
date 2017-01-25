@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using Beleg3.Migrations;
 
 namespace Beleg3.Models
 {
@@ -23,8 +24,10 @@ namespace Beleg3.Models
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
         {
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<ApplicationDbContext, Configuration>());
         }
 
+        public DbSet<TodoModel> Todo { get; set; }
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();
