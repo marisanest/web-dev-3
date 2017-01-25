@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Beleg3.Migrations;
+using System.Collections.Generic;
 
 namespace Beleg3.Models
 {
@@ -17,6 +18,8 @@ namespace Beleg3.Models
             // Add custom user claims here
             return userIdentity;
         }
+
+        public virtual ICollection<TodoModel> Todos { get; set; }
     }
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>

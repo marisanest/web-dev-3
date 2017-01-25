@@ -18,15 +18,16 @@ namespace Beleg3.Controllers
                 {
                     var loggedInUser = HttpContext.User.Identity.Name;
                     var user = db.Users.First(u => u.Email == loggedInUser);
-                    var list = db.Todo.Where(b => b.Owner.Id == user.Id).ToList();
-                    List<TodoModel> todoList = new List<TodoModel>();
-                    foreach (var item in list){
+                    var todoList = user.Todos.ToList();
+                 /*Nachdem virtual Membervariable zu IdentityModels hinzugefügt habe, kann auf users Membervariable statt auf Datenbank zugegriffen werden
+                  * kann auch noch bei den anderen Methoden implementiert werden.. 
+                  *     var list = db.Todo.Where(b => b.Owner.Id == user.Id).ToList();
+                        List<TodoModel> todoList = new List<TodoModel>();
+                        foreach (var item in list){
                         var todo = new TodoModel();
                         todo = item;
                         todoList.Add(todo);
-
-
-                    }
+                    }*/
                     return View(todoList);
                  
                 }
@@ -63,7 +64,7 @@ namespace Beleg3.Controllers
                     if (HttpContext.User.Identity.IsAuthenticated)
                     {
                         var loggedInUser = HttpContext.User.Identity.Name;
-                        var user = db.Users.First(u => u.Id == loggedInUser);
+                        var user = db.Users.First(u => u.Email == loggedInUser);
                         model.Owner = user;
                         db.Todo.Add(model);
                         db.SaveChanges();
@@ -81,29 +82,76 @@ namespace Beleg3.Controllers
         // GET: Todo/Edit/5
         public ActionResult Edit(int id)
         {
+            using (var db = new Models.ApplicationDbContext())
+            {
+                if (HttpContext.User.Identity.IsAuthenticated)
+                {
+                    var loggedInUser = HttpContext.User.Identity.Name;
+                    var user = db.Users.First(u => u.Email == loggedInUser);
+                    var list = db.Todo.Where(b => b.Id == id);
+                return View(list.First());
+
+                }
+            }
+            //else redirect to login?!
             return View();
         }
 
         // POST: Todo/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(int id, TodoModel model)
         {
             try
             {
-                // TODO: Add update logic here
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
 
-                return RedirectToAction("Index");
+                using (var db = new Models.ApplicationDbContext())
+                {
+                    if (HttpContext.User.Identity.IsAuthenticated)
+                    {
+                        var list = db.Todo.Where(b => b.Id == model.Id);
+                        list.First().Titel = model.Titel;
+                        list.First().Description = model.Description;
+                        db.SaveChanges();
+                        return RedirectToAction("Index");
+                    } else
+                    {
+                        //redirect to login?!
+                        return RedirectToAction("Index");
+                    }
+                }
             }
             catch
             {
-                return View();
+                return RedirectToAction("Index");
             }
         }
 
         // GET: Todo/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            try { 
+            using (var db = new Models.ApplicationDbContext())
+            {
+                if (HttpContext.User.Identity.IsAuthenticated)
+                {
+                    var list = db.Todo.Where(b => b.Id == id);
+                    return View(list.First());
+                }
+                else
+                {
+                    //redirect to login?!
+                    return RedirectToAction("Index");
+                }
+            }
+            }
+            catch
+            {
+                return RedirectToAction("Index");
+            }
         }
 
         // POST: Todo/Delete/5
@@ -112,13 +160,25 @@ namespace Beleg3.Controllers
         {
             try
             {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
+                using (var db = new Models.ApplicationDbContext())
+                {
+                    if (HttpContext.User.Identity.IsAuthenticated)
+                    {
+                        var list = db.Todo.Where(b => b.Id == id);
+                        db.Todo.Remove(list.First());
+                        db.SaveChanges();
+                        return RedirectToAction("Index");
+                    }
+                    else
+                    {
+                        //redirect to login?!
+                        return RedirectToAction("Index");
+                    }
+                }  
             }
             catch
             {
-                return View();
+                return RedirectToAction("Index");
             }
         }
     }
