@@ -1,8 +1,6 @@
 ﻿using Beleg3.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace Beleg3.Controllers
@@ -12,28 +10,58 @@ namespace Beleg3.Controllers
         // GET: Todo
         public ActionResult Index()
         {
-            using (var db = new Models.ApplicationDbContext())
+            if (HttpContext.User.Identity.IsAuthenticated)
             {
-                if (HttpContext.User.Identity.IsAuthenticated)
+                if (HttpContext.User.IsInRole("Admin"))
                 {
-                    var loggedInUser = HttpContext.User.Identity.Name;
-                    var user = db.Users.First(u => u.Email == loggedInUser);
-                    var todoList = user.Todos.ToList();
-                 /*Nachdem virtual Membervariable zu IdentityModels hinzugefügt habe, kann auf users Membervariable statt auf Datenbank zugegriffen werden
-                  * kann auch noch bei den anderen Methoden implementiert werden.. 
-                  *     var list = db.Todo.Where(b => b.Owner.Id == user.Id).ToList();
-                        List<TodoModel> todoList = new List<TodoModel>();
-                        foreach (var item in list){
-                        var todo = new TodoModel();
-                        todo = item;
-                        todoList.Add(todo);
-                    }*/
-                    return View(todoList);
-                 
+                    return RedirectToAction("AdminIndex");
+                }
+                else
+                {
+                    using (var db = new ApplicationDbContext())
+                    {
+                        var loggedInUser = HttpContext.User.Identity.Name;
+                        var user = db.Users.First(u => u.Email == loggedInUser);
+                        var todoList = user.Todos.ToList();
+                        /*Nachdem virtual Membervariable zu IdentityModels hinzugefügt habe, kann auf users Membervariable statt auf Datenbank zugegriffen werden
+                         * kann auch noch bei den anderen Methoden implementiert werden.. 
+                         *     var list = db.Todo.Where(b => b.Owner.Id == user.Id).ToList();
+                               List<TodoModel> todoList = new List<TodoModel>();
+                               foreach (var item in list){
+                               var todo = new TodoModel();
+                               todo = item;
+                               todoList.Add(todo);
+                           }*/
+                        return View(todoList);
+                    }
                 }
             }
-                return View();
+            return View();
         }
+
+        public ActionResult AdminIndex()
+        {
+            using (var db = new ApplicationDbContext())
+            {
+
+                var userList = db.Users.ToList() ;
+                if (userList == null)
+                {
+                    return View();
+                } else {
+                    var users = new List<ApplicationUser>();
+                    foreach (var item in userList)
+                {
+                       if (!item.Roles.Equals("Admin"))
+                        {
+                            users.Add(item);
+                        }
+                }
+                return View(users);
+            }
+            }
+        }
+
 
         // GET: Todo/Details/5
         public ActionResult Details(int id)
@@ -75,7 +103,7 @@ namespace Beleg3.Controllers
             catch
             {
                 return RedirectToAction("Index");
-//                return View();
+                //                return View();
             }
         }
 
@@ -89,7 +117,7 @@ namespace Beleg3.Controllers
                     var loggedInUser = HttpContext.User.Identity.Name;
                     var user = db.Users.First(u => u.Email == loggedInUser);
                     var list = db.Todo.Where(b => b.Id == id);
-                return View(list.First());
+                    return View(list.First());
 
                 }
             }
@@ -117,7 +145,8 @@ namespace Beleg3.Controllers
                         list.First().Description = model.Description;
                         db.SaveChanges();
                         return RedirectToAction("Index");
-                    } else
+                    }
+                    else
                     {
                         //redirect to login?!
                         return RedirectToAction("Index");
@@ -133,20 +162,21 @@ namespace Beleg3.Controllers
         // GET: Todo/Delete/5
         public ActionResult Delete(int id)
         {
-            try { 
-            using (var db = new Models.ApplicationDbContext())
+            try
             {
-                if (HttpContext.User.Identity.IsAuthenticated)
+                using (var db = new Models.ApplicationDbContext())
                 {
-                    var list = db.Todo.Where(b => b.Id == id);
-                    return View(list.First());
+                    if (HttpContext.User.Identity.IsAuthenticated)
+                    {
+                        var list = db.Todo.Where(b => b.Id == id);
+                        return View(list.First());
+                    }
+                    else
+                    {
+                        //redirect to login?!
+                        return RedirectToAction("Index");
+                    }
                 }
-                else
-                {
-                    //redirect to login?!
-                    return RedirectToAction("Index");
-                }
-            }
             }
             catch
             {
@@ -174,7 +204,7 @@ namespace Beleg3.Controllers
                         //redirect to login?!
                         return RedirectToAction("Index");
                     }
-                }  
+                }
             }
             catch
             {

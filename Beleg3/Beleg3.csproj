@@ -179,6 +179,7 @@
       <DependentUpon>201701251323096_AddedTodos.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Migrations\Person.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
@@ -245,6 +246,7 @@
     <Content Include="Views\Todo\Create.cshtml" />
     <Content Include="Views\Todo\Edit.cshtml" />
     <Content Include="Views\Todo\Delete.cshtml" />
+    <Content Include="Views\Todo\AdminIndex.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
