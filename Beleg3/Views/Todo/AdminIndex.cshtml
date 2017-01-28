@@ -29,6 +29,11 @@
 
                     @todo.Description
                 </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = todo.Id }) |
+                    @Html.ActionLink("Details", "Details", new { id = todo.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = todo.Id }) |            
+                </td>
             </tr>
         }
     }
