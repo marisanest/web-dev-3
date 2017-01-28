@@ -7,14 +7,22 @@ namespace Beleg3.Controllers
 {
     public class TodoController : Controller
     {
+
+        public const string ADMIN = "Admin";
+        public const string ADMIN_EMAIL = "admin@todo.de";
+        public const string ADMIN_INDEX = "AdminIndex";
+        public const string INDEX = "Index";
+
+
+
         // GET: Todo
         public ActionResult Index()
         {
             if (HttpContext.User.Identity.IsAuthenticated)
             {
-                if (HttpContext.User.IsInRole("Admin"))
+                if (HttpContext.User.IsInRole(ADMIN))
                 {
-                    return RedirectToAction("AdminIndex");
+                    return RedirectToAction(ADMIN_INDEX);
                 }
                 else
                 {
@@ -54,7 +62,7 @@ namespace Beleg3.Controllers
                     var ownerTodos = new List<ICollection<TodoModel>>();
                     foreach (var user in userList)
                     {
-                        if (!user.Roles.Equals("Admin"))
+                        if (!user.Roles.Equals(ADMIN))
                         {
                             var todolist = user.Todos.ToList();
                             ownerTodos.Add(todolist);
@@ -112,11 +120,11 @@ namespace Beleg3.Controllers
                         db.SaveChanges();
                     }
                 }
-                return RedirectToAction("Index");
+                return RedirectToAction(INDEX);
             }
             catch
             {
-                return RedirectToAction("Index");
+                return RedirectToAction(INDEX);
                 //                return View();
             }
         }
@@ -158,18 +166,18 @@ namespace Beleg3.Controllers
                         list.First().Titel = model.Titel;
                         list.First().Description = model.Description;
                         db.SaveChanges();
-                        return RedirectToAction("Index");
+                        return RedirectToAction(INDEX);
                     }
                     else
                     {
                         //redirect to login?!
-                        return RedirectToAction("Index");
+                        return RedirectToAction(INDEX);
                     }
                 }
             }
             catch
             {
-                return RedirectToAction("Index");
+                return RedirectToAction(INDEX);
             }
         }
 
@@ -188,13 +196,13 @@ namespace Beleg3.Controllers
                     else
                     {
                         //redirect to login?!
-                        return RedirectToAction("Index");
+                        return RedirectToAction(INDEX);
                     }
                 }
             }
             catch
             {
-                return RedirectToAction("Index");
+                return RedirectToAction(INDEX);
             }
         }
 
@@ -211,18 +219,18 @@ namespace Beleg3.Controllers
                         var list = db.Todo.Where(b => b.Id == id);
                         db.Todo.Remove(list.First());
                         db.SaveChanges();
-                        return RedirectToAction("Index");
+                        return RedirectToAction(INDEX);
                     }
                     else
                     {
                         //redirect to login?!
-                        return RedirectToAction("Index");
+                        return RedirectToAction(INDEX);
                     }
                 }
             }
             catch
             {
-                return RedirectToAction("Index");
+                return RedirectToAction(INDEX);
             }
         }
     }
