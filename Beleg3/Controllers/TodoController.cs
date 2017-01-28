@@ -43,22 +43,36 @@ namespace Beleg3.Controllers
         {
             using (var db = new ApplicationDbContext())
             {
-
-                var userList = db.Users.ToList() ;
+                var userList = db.Users.ToList();
                 if (userList == null)
                 {
                     return View();
-                } else {
-                    var users = new List<ApplicationUser>();
-                    foreach (var item in userList)
-                {
-                       if (!item.Roles.Equals("Admin"))
-                        {
-                            users.Add(item);
-                        }
                 }
-                return View(users);
-            }
+                else
+                {
+                    var userAndTodos = new List<string[]>();
+                    var ownerTodos = new List<ICollection<TodoModel>>();
+                    foreach (var user in userList)
+                    {
+                        if (!user.Roles.Equals("Admin"))
+                        {
+                            var todolist = user.Todos.ToList();
+                            ownerTodos.Add(todolist);
+                            foreach ( var todo in todolist)
+                            {
+                                string[] todos = new string[3];
+                                todos[0] = user.UserName;
+                                todos[1] = todo.Titel;
+                                todos[2] = todo.Description;
+                                userAndTodos.Add(todos);
+                            }
+                        }
+                    }
+                    ViewData["userAndTodos"] = userAndTodos;
+                    ViewData["userList"] = userList;
+                    ViewData["ownerTodos"] = ownerTodos;
+                    return View();
+                }
             }
         }
 
